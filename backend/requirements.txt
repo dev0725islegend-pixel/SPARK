@@ -1,0 +1,16 @@
+fastapi==0.95.2
+uvicorn[standard]==0.23.1
+gunicorn==20.1.0
+httpx==0.24.1
+SQLAlchemy==1.4.49
+psycopg2-binary==2.9.7
+alembic==1.11.1
+python-jose==3.3.0
+passlib[argon2]==1.7.4
+python-dotenv==1.0.0
+redis==4.5.5
+sse-starlette==1.1.2
+pydantic==1.10.12
+python-multipart==0.0.6
+python-magic-bin==0.4.27
+email-validator==2.0.0.post1
