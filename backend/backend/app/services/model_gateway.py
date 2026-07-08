@@ -140,6 +140,10 @@ class ModelGateway:
                 raise
 
     def stream(self, prompt: str, **kwargs) -> Iterable[str]:
+        """Streaming policy: immediate abort on provider error (no mid-stream failover).
+
+        This implements policy A to avoid partial/duplicated streams when providers are switched.
+        """
         logger.info("ModelGateway.stream provider=%s prompt_len=%d", self._provider.name, len(prompt))
         start = time_ns()
         try:
@@ -148,13 +152,8 @@ class ModelGateway:
                 yield chunk
         except Exception as e:
             logger.exception("ModelGateway.stream error: %s", e)
-            # try failover and re-stream once
-            try:
-                self._failover_load()
-                for chunk in self._provider.stream(prompt, **kwargs):
-                    yield chunk
-            except Exception:
-                raise
+            # Immediate abort: log and re-raise to propagate error to caller
+            raise
         finally:
             elapsed = time_ns() - start
             logger.info("ModelGateway.stream finished provider=%s elapsed_ns=%d", self._provider.name, elapsed)
@@ -190,6 +189,7 @@ def time_ns():
 
 # Provide a module-level singleton for easy importing
 _gateway_singleton: Optional[ModelGateway] = None
+
 
 def get_model_gateway() -> ModelGateway:
     global _gateway_singleton
